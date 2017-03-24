@@ -59,9 +59,11 @@ int main(int argc, char *argv[])
 	}
 	/*------------------------------------------------*/
 
-	for (i=0;i<64;i++){
-		printf ("%f ",histogramme[i]);
-	}
+	fwrite(histogramme, sizeof (float), 64, stdout);
+	/*for (i=0;i<64;i++){
+		
+		//printf ("%f ",histogramme[i]);
+	}*/
 
   exit(0);
 }
