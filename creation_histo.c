@@ -27,7 +27,7 @@ int main(int argc, char *argv[])
 {
 	int i,j,n,nx,ny,nb,num;
 	CIMAGE cim;
-	float [64] histogramme;
+	float histogramme[64];
 
 	/*------------------------------------------------*/
 	/* lecture d'une image requête                    */
@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
 	/*------------------------------------------------*/
 
 	for (i=0;i<64;i++){
-		printf ("%i ",histogramme[i]);
+		printf ("%f ",histogramme[i]);
 	}
 
   exit(0);
