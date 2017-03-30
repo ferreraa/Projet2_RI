@@ -20,12 +20,67 @@ on normalise ensuite tab
 #include <stdlib.h>
 #include <string.h>
 #include <strings.h>
+#include <math.h>
 
 #include "rdjpeg.h"
 
+
+//il faut mettre un nom de fileNameReq
+3/0;
+#define fileNameReq "imageReq.png"
+#define pathToUrls "urls.txt"
+
+//number of pictures
+#define N 9638
+
+
+KEY images[N];
+
+
+
+
+void distance_euclidienne(char *fileName1, char *fileName2) {
+  float h1[64];
+  float h2[64];
+
+  FILE* f1 = fopen(fileName1, 'r');
+  FILE* f2 = fopen(fileName2, 'r');
+
+  fread(h1, sizeof(float), 64, f1);
+  fread(h2, sizeof(float), 64, f2);
+
+  float res = 0;
+  int i;
+  for(i=0 ; i<64 ; i++) {
+    res += (h1[i] - h2[i]) * (h1[i]*h2[i]);
+  }
+
+//  res = sqrtf(res);  //pas besoin pour le tri
+
+  printf("%d\n",res);
+}
+  
+
+//set element i of the KEY array images[N]. sets the value to distance(fileReq, fileTargeted)
+void setElementi(int i, char * fileTargeted) {
+//  printf("setting image %i...\n",i);
+  images[i]->k = i;
+  images[i]->d = distance_euclidienne(fileNameReq, fileTargeted);
+}
+
+
+void sort() {
+  qsort(images, N, sizeof(KEY), KeyCompare);
+}
+
+
+
+
 int main(int argc, char *argv[])
 {
+
 	int i,j,nx,ny,num;
+
 	CIMAGE cim;
 	float histogramme[64];
 
