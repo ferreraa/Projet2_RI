@@ -36,7 +36,7 @@ char **readList(char *name, int *n)
   return(list);
 }
 
-void freeList(char *name, int n)
+void freeList(char **name, int n)
 {
   int i;
   for (i = 0; i < n; i++) free(name[i]);

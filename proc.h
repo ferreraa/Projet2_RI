@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <strings.h>
-
+#include <malloc.h>
 typedef struct {
   int k;
   float d;
