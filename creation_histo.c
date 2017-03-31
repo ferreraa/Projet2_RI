@@ -26,7 +26,8 @@ on normalise ensuite tab
 
 
 //il faut mettre un nom de fileNameReq
-3/0;
+//3/0;
+
 #define fileNameReq "imageReq.png"
 #define pathToUrls "urls.txt"
 
