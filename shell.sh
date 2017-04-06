@@ -1,7 +1,8 @@
 
 #!/bin/bash
 
-cd ./sift2/
+cd ./sift/
+
 for element in *
 
 do	
@@ -12,12 +13,14 @@ do
 	
 	#echo $line|sed's/<.*>;/"/g'|tr -d ";" >> sample.txt
 	i=1;
-	for line in $(cat $element ); do
-		
+	while read line
+	do	
         if  !((i %150)) ; then 
 		echo $line >> "sample.txt"
+		#echo $line
 	fi
 	((i=i+1));
-	done;
+	done <$element
 done
+
 

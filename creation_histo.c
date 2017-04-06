@@ -37,14 +37,13 @@ KEY images[N];
 float histogramme[64]; //l'histogramme du fichier requete
 
 
-//fileName1 : image comparée.
-//h1 : histogramme de l'image recherchée
-void distance_euclidienne(FILE *fileName1) {
+//fileTargeted : image comparée.
+float distance_euclidienne(FILE *fileTargeted) {
 //  float h1[64];
   float h2[64]; //histogramme de l'image comparée
 
 //  fread(h1, sizeof(float), 64, f1);
-  fread(h2, sizeof(float), 64, f2);
+  fread(h2, sizeof(float), 64, fileTargeted);
 
   float res = 0;
   int i;
@@ -61,8 +60,8 @@ void distance_euclidienne(FILE *fileName1) {
 //set element i of the KEY array images[N]. sets the value to distance(FILE * fileTargeted)
 void setElementi(int i, FILE * fileTargeted) {
 //  printf("setting image %i...\n",i);
-  images[i]->k = i;
-  images[i]->d = distance_euclidienne(fileTargeted);
+  images[i].k = i;
+  images[i].d = distance_euclidienne(fileTargeted);
 }
 
 
@@ -131,8 +130,10 @@ int main(int argc, char *argv[])
 //  FILE* freq = fopen(FileNameReq,'r');
 //  fread(histogramme,sizeof(float),64,freq);
 
-	int n;
+  int n;
   char** url =readList("urls.txt",&n);
+
+  n=10; //TODO RETIRER POUR VISUALISER LE RESULTAT FINAL
 
   printf("urls lus\n");
 
@@ -170,7 +171,7 @@ int main(int argc, char *argv[])
 //------------------------Fin de creation histogramme requete-------
 
 
-  File * fHistos = fopen(fileHisto,'r');
+  FILE * fHistos = fopen(fileHisto,"r");
 
   for (i=0; i<n;i++){
     //calcul de l'histogramme de ce fichier 
@@ -185,13 +186,13 @@ int main(int argc, char *argv[])
 		printf(" je suis la\n");
 	}
 
-  printf("sorting results...\n);
+  printf("sorting results...\n");
 
   sort();
 
   printf("creating res file...\n");
 
-  FILE* Fres = fopen("out.html",'w');
+  FILE* Fres = fopen("out.html","w");
 
   for(i=0 ; i < n; i++) {
     fprintf(Fres, "<IMG SRC=\"%s\">\n",url[images[i].k]);
