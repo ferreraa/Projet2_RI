@@ -43,12 +43,11 @@ float distance_euclidienne(FILE *fileTargeted) {
   float h2[64]; //histogramme de l'image comparée
 
 //  fread(h1, sizeof(float), 64, f1);
-  printf("fread : %i\n",fread(h2, sizeof(float), 64, fileTargeted));
+  fread(h2, sizeof(float), 64, fileTargeted);
 
   float res = 0;
   int i;
   for(i=0 ; i<64 ; i++) {
-    printf("h2[%i] = %f...",i,h2[i]);
     res += (histogramme[i] - h2[i]) * (histogramme[i]-h2[i]);
   }
 
