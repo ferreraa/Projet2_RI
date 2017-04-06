@@ -43,23 +43,24 @@ float distance_euclidienne(FILE *fileTargeted) {
   float h2[64]; //histogramme de l'image comparée
 
 //  fread(h1, sizeof(float), 64, f1);
-  fread(h2, sizeof(float), 64, fileTargeted);
+  printf("fread : %i\n",fread(h2, sizeof(float), 64, fileTargeted));
 
   float res = 0;
   int i;
   for(i=0 ; i<64 ; i++) {
+    printf("h2[%i] = %f...",i,h2[i]);
     res += (histogramme[i] - h2[i]) * (histogramme[i]-h2[i]);
   }
 
 //  res = sqrtf(res);  //pas besoin pour le tri
 
-  printf("%f\n",res);
+  printf("res = %f\n",res);
   return res;
 }
 
 //set element i of the KEY array images[N]. sets the value to distance(FILE * fileTargeted)
 void setElementi(int i, FILE * fileTargeted) {
-//  printf("setting image %i...\n",i);
+  printf("setting image %i...\n",i);
   images[i].k = i;
   images[i].d = distance_euclidienne(fileTargeted);
 }
@@ -77,7 +78,7 @@ int main(int argc, char *argv[])
 	CIMAGE cim;
 	float histogramme[64];
 
-	FILE* FO= fopen ("histo.txt", "w");
+	FILE* FO= fopen ("histo.txt", "r");
 /*
 	int n;
     char** url =readList("urls.txt",&n);
@@ -135,11 +136,15 @@ int main(int argc, char *argv[])
 
   n=10; //TODO RETIRER POUR VISUALISER LE RESULTAT FINAL
 
+  for(i=0; i<n;i++) {
+    printf("url %i : %s\n", i+1, url[i]);
+  }
+
   printf("urls lus\n");
 
 //-----------------CREATION HISTOGRAMME REQUETE----------
 
-	read_cimage(fileNameReq,&cim);
+  read_cimage(fileNameReq,&cim);
 
   printf("Image requete lue\n");
 
@@ -171,7 +176,7 @@ int main(int argc, char *argv[])
 //------------------------Fin de creation histogramme requete-------
 
 
-  FILE * fHistos = fopen(fileHisto,"r");
+  FILE * fHistos = fopen(fileHisto,"rb");
 
   for (i=0; i<n;i++){
     //calcul de l'histogramme de ce fichier 
@@ -183,7 +188,9 @@ int main(int argc, char *argv[])
 
     setElementi(i, fHistos);
     
-		printf(" je suis la\n");
+		printf(" images[%i].k = %i, images[%i].d = %f\n",i,images[i].k,i,images[i].d);
+    
+
 	}
 
   printf("sorting results...\n");
@@ -200,7 +207,7 @@ int main(int argc, char *argv[])
 
 
   fclose(Fres);
-	fclose(FO);
+  fclose(FO);
 
   exit(0);
 }
