@@ -1,6 +1,6 @@
 #!/bin/sh
 
-for f in /u/q/quenotg/sift/test/*.sift
+for f in /home/Public/quenotg/HMUL8R6B/PROJET/test/sift/*.sift
 do
   echo "Traitrement de $f"
   sed -n '4,$p' $f | tr -d ";" | sed 's/<CIRCLE [1-9].*> //' > ./trav.sift
