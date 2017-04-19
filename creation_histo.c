@@ -181,7 +181,7 @@ void chercher_image_couleur(char * url, int nb_retour, char ** url_list){
 
 	printf("sorting results...\n");
 
-	sort();
+	//sort();
 	printf ("\n\n");
 	for (i=0;i <n;i++){
 		printf(" images[%i].k = %i, images[%i].d = %f\n",i,images[i].k,i,images[i].d);
