@@ -1,17 +1,3 @@
-/* regarder la valeur pour le rouge le bleu et le vert 
-diviser par 64
-multiplier le rouge par 4
-le vert par 16
-additionnner tout le monde 
-on as un nombre n entre 0 et 63
-
-tab[n]++;
-
-on normalise ensuite tab
-* 
-* 
-*/
-
 #include <stdio.h>
 #include <malloc.h>
 #include <stdlib.h>
@@ -35,8 +21,9 @@ int N;
 KEY* images;
 float histogramme[64]; //l'histogramme du fichier requete
 
-
-//fileTargeted : image comparée.
+//calcule la distance euclidienne entre JE SAIS PAS QUOI et l'histogramme du fichier requete qui en variable globale (BIZARRE)
+//PARAMETRE :fileTargeted : image comparée.
+//SORTIE : float : distance entre JE SAIS PAS 
 float distance_euclidienne(FILE *fileTargeted) {
   float h2[64]; //histogramme de l'image comparée
 
@@ -50,7 +37,9 @@ float distance_euclidienne(FILE *fileTargeted) {
   return res;
 }
 
+ 
 //set element i of the KEY array images[N]. sets the value to distance(FILE * fileTargeted)
+//PARAMETRE : descripteur de fichier filTargeted
 void setElementi(int i, FILE * fileTargeted) {
   printf("setting image %i...\n",i);
   images[i].k = i;
@@ -58,12 +47,17 @@ void setElementi(int i, FILE * fileTargeted) {
 }
 
 
+// trie les images 
 void sort() {
   qsort(images, N, sizeof(KEY), keyCompare);
 }
 
 
 
+//BIZARRE : prend un nom de fichier et pas une URL ????
+// calcule l'histogramme normalisee d'une image sift. 
+//parametre un histogramme vide de taille 256, et le nom d'un fichier sift a ouvrir ????
+// retourne l'histogramme de l'image dont le nom est passe en parametre normalise
 void process_histogramme_sift(float* histogramme,char* fname) {
 	int x;
 	FILE * f = fopen(fname, "r");
@@ -88,10 +82,25 @@ void process_histogramme_sift(float* histogramme,char* fname) {
 
 
 void creation_histos_sift(){
-	
+	float histogramme[256];
+	FILE* FO= fopen ("histo_sift.txt", "r");
+	int n,i;
+	n=100;
+    //char** url =readList("urls.txt",&N);
+    
+    //comment on recupere le nom des images ????
+    
+    //possible problemme si couleur et sift utilise images
+    images = malloc(sizeof(KEY)*N);
+    for (i=0; i<n;i++){
+		process_histogramme_sift (histogramme,"nom");
+		fwrite(histogramme, sizeof (float), 256, FO);
+	}
 }
 
 //créé l'histogramme d'une image donnée	
+//PARAMETTRE : un tableau vide de taille 64, une url d'image 
+//RETOURNE :l'histogramme de l'image.
 void process_histogramme_couleur (float* histogramme, char * url) {
 	int i,j,nx,ny,num,x;
 
@@ -125,14 +134,17 @@ void process_histogramme_couleur (float* histogramme, char * url) {
 	}
 }
 
-
+// cree un fichier contennat tout les histogramme des images 
+//PARAMETTRE: ecrit dans le fichier histo.txt, et lit la liste des urls dans le fichier urls.txt
+//RETOUR : les histogrammes des images sont ecrit dans le fichier histo.txt
 void creation_histos_couleur() {
 
 	float histogramme[64];
 	FILE* FO= fopen ("histo.txt", "r");
-	int n,i;
+	int i;
     char** url =readList("urls.txt",&N);
     images = malloc(sizeof(KEY)*N);
+    int n=100;
     for (i=0; i<n;i++){
 		process_histogramme_couleur (histogramme,url[i]);
 		fwrite(histogramme, sizeof (float), 64, FO);
@@ -140,13 +152,16 @@ void creation_histos_couleur() {
 }
 
 
-	
+// cherche une image en fonction de sont histogramme de couleur 
+//PARAMETTRE : l'url de l'image requette et le nombre d'image a retourner , se sert du fichier histo.txt prerequis ce fichier contient les histogramme de toute les images de la base
+//RETOUR : les images reponses	
 void chercher_image_couleur(char * url, int nb_retour){
 	FILE* FO= fopen ("histo.txt", "r");
+	//TODO verifier que ce fichier n'est pas vide 
 	int i;
 	float histogramme[64]; 
 	process_histogramme_couleur(histogramme,url);
-
+	//TODO possible problemme 
 	FILE * fHistos = fopen(fileHisto,"rb");
 
 	//TODO trouver une solution pour le parcours de ce fichier 
@@ -176,12 +191,14 @@ void chercher_image_couleur(char * url, int nb_retour){
 
 
 void chercher_image_sift(char * url, int nb_retour){
-		FILE* FO= fopen ("histo_sift.txt", "r");
-int i;
+	FILE* FO= fopen ("histo_sift.txt", "r");
+	int i;
 	float histogramme[256]; 
 	process_histogramme_sift(histogramme,url);
 
 	FILE * fHistos = fopen(fileHisto,"rb");
+	//TODO changer ca 
+	int n=100;
 	for (i=0; i<n;i++){
    		printf ("Procesing %d/%d ...\n",i,N);
 		setElementi(i, fHistos);
@@ -199,7 +216,6 @@ int i;
 	for(i=0 ; i < nb_retour; i++) {
 		fprintf(Fres, "<IMG SRC=\"%i\">\n",url[images[i].k]); //TODO trouver l'url de l'image n° images[i].k
 	}	
-
 
 	fclose(Fres);
 	fclose(FO);
