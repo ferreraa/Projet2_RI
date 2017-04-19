@@ -60,11 +60,13 @@ void sort() {
 //parametre un histogramme vide de taille 256, et le nom d'un fichier sift a ouvrir ????
 // retourne l'histogramme de l'image dont le nom est passe en parametre normalise
 void process_histogramme_sift(float* histogramme,char* fname) {
+	printf ("je commencea traiter l'image : %s\n", fname);
 	int x;
+	printf ("j'ouvre le fichier avec l'image \n");
 	FILE * f = fopen(fname, "r");
 	
 	int num = 0,i=0;
-
+	printf ("initialisation de l'histogramme\n");
 	/*initialisation de l'histogramme*/
 	for (x=0;x<256;x++){
 		histogramme[x]=0.0;
@@ -74,27 +76,40 @@ void process_histogramme_sift(float* histogramme,char* fname) {
 		histogramme[num]++;
 		i++;
 	}
+	
+	printf ("normalisation\n");
 	//normalisation
 	for (x=0;x<256;x++){
 		histogramme[x]= histogramme[x]/(i);
 	}
+	printf ("je fini de traiter l'image : %s\n", fname);
 	
 }
 
 
 void creation_histos_sift(){
+
 	float histogramme[256];
+	printf ("Ouverture du fichier de sortie \n");
 	FILE* FO= fopen ("histo_sift.txt", "r");
+	printf ("Ouverture du fichier de sortie sucess \n");
 	int n,i;
 	n=100;
-    //char** url =readList("urls.txt",&N);
-    
-    //comment on recupere le nom des images ????
-    
+    	char** nom =readList("../../../list.txt",&N);
+        printf (" N= %i\n", N);
     //possible problemme si couleur et sift utilise images
-    images = malloc(sizeof(KEY)*N);
-    for (i=0; i<n;i++){
-		process_histogramme_sift (histogramme,"nom");
+	printf(" allocation des images\n");
+    	images = malloc(sizeof(KEY)*N);
+	printf(" allocation des images sucess\n");
+	//char * nom_image;
+	//nom_image= malloc (sizeof (char )*3000);
+	//nom_image = "sift/test/1nn";	
+    for (i=0; i<N;i++){
+		//printf("initialisation du nom \n");
+		//strcat(nom_image,nom[i]); 
+		printf(" Procesing image : %s \n", nom[i]);
+		
+		process_histogramme_sift (histogramme,nom[i]);
 		fwrite(histogramme, sizeof (float), 256, FO);
 	}
 }
@@ -246,15 +261,16 @@ int main(int argc, char *argv[])
 	//creation_histos_couleur();
 
 	//generer l'histogramme des images en fonction du clustering : 
-	//creation_histos_sift();
+	printf ("Creation de l'histogramme sift\n");
+	creation_histos_sift();
 
 	//chercher une image en fonction des couleurs :
-	printf ("entrez une url \n");
+	//printf ("entrez une url \n");
 	
-	scanf("%s", url);
-	printf("entrez un nombre de retour\n");
-	scanf("%i",&nb_retour);
-	chercher_image_couleur(url, nb_retour, url_list);
+	//scanf("%s", url);
+	//printf("entrez un nombre de retour\n");
+	//scanf("%i",&nb_retour);
+	//chercher_image_couleur(url, nb_retour, url_list);
 
 	//chercher une image en fonction des cluster :
 	//printf ("entrez une url \n");
