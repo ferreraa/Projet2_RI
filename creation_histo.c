@@ -17,7 +17,7 @@
 
 
 
-int N;
+int N=100;
 KEY* images;
 float histogramme[64]; //l'histogramme du fichier requete
 
@@ -43,6 +43,7 @@ float distance_euclidienne(FILE *fileTargeted) {
 void setElementi(int i, FILE * fileTargeted) {
   printf("setting image %i...\n",i);
   images[i].k = i;
+  printf ("je suis la \n");
   images[i].d = distance_euclidienne(fileTargeted);
 }
 
@@ -142,6 +143,7 @@ void creation_histos_couleur() {
 	float histogramme[64];
 	FILE* FO= fopen ("histo.txt", "r");
 	int i;
+	//TODO probablement pas a faire ici 
     char** url =readList("urls.txt",&N);
     images = malloc(sizeof(KEY)*N);
     int n=100;
@@ -155,7 +157,7 @@ void creation_histos_couleur() {
 // cherche une image en fonction de sont histogramme de couleur 
 //PARAMETTRE : l'url de l'image requette et le nombre d'image a retourner , se sert du fichier histo.txt prerequis ce fichier contient les histogramme de toute les images de la base
 //RETOUR : les images reponses	
-void chercher_image_couleur(char * url, int nb_retour){
+void chercher_image_couleur(char * url, int nb_retour, char ** url_list){
 	printf ("je commence a chercher l'image couleur\n");
 	FILE* FO= fopen ("histo.txt", "r");
 	printf ("j'ai ouvert le fichier histo.txt\n");
@@ -163,28 +165,35 @@ void chercher_image_couleur(char * url, int nb_retour){
 	int i;
 	float histogramme[64]; 
 	process_histogramme_couleur(histogramme,url);
-	printf(" je calcule l'histogramme de cette image \n");
+	printf(" j'ai calculer l'histogramme de cette image \n");
+	images = malloc(sizeof(KEY)*N);
 	//TODO possible problemme 
-	FILE * fHistos = fopen(fileHisto,"rb");
+	//FILE * fHistos = fopen(fileHisto,"rb");
 
 	//TODO trouver une solution pour le parcours de ce fichier 
 	int n=100;
 	for (i=0; i<n;i++){
-   		printf ("Procesing %d/%d ...\n",i,N);
-		setElementi(i, fHistos);
+   		printf ("Procesing %d/%d ...\n",i,n);
+		//setElementi(i, fHistos);
+		setElementi(i, FO);
 		printf(" images[%i].k = %i, images[%i].d = %f\n",i,images[i].k,i,images[i].d);
     }
 
 	printf("sorting results...\n");
 
 	sort();
-
+	printf ("\n\n");
+	for (i=0;i <n;i++){
+		printf(" images[%i].k = %i, images[%i].d = %f\n",i,images[i].k,i,images[i].d);
+	}
+	printf ("\n\n");
 	printf("creating res file...\n");
 
 	FILE* Fres = fopen("out.html","w");
 
 	for(i=0 ; i < nb_retour; i++) {
-		fprintf(Fres, "<IMG SRC=\"%i\">\n",url[images[i].k]);
+		
+		fprintf(Fres, "%i : %i<IMG SRC=\"%s\">\n",i,images[i].k, url_list[images[i].k]);
 	}	
 
 
@@ -193,7 +202,7 @@ void chercher_image_couleur(char * url, int nb_retour){
 }	
 
 
-void chercher_image_sift(char * url, int nb_retour){
+void chercher_image_sift(char * url, int nb_retour, char ** url_list){
 	FILE* FO= fopen ("histo_sift.txt", "r");
 	int i;
 	float histogramme[256]; 
@@ -217,7 +226,7 @@ void chercher_image_sift(char * url, int nb_retour){
 	FILE* Fres = fopen("out.html","w");
 
 	for(i=0 ; i < nb_retour; i++) {
-		fprintf(Fres, "<IMG SRC=\"%i\">\n",url[images[i].k]); //TODO trouver l'url de l'image n° images[i].k
+		fprintf(Fres, "<IMG SRC=\"%s\">\n",url_list[images[i].k]); //TODO trouver l'url de l'image n° images[i].k
 	}	
 
 	fclose(Fres);
@@ -232,6 +241,7 @@ int main(int argc, char *argv[])
 {
 	int nb_retour;
 	char url[300];
+	char** url_list =readList("urls.txt",&N);
 	//generer l'histogramme des images en fonction de la couleur :
 	//creation_histos_couleur();
 
@@ -244,15 +254,15 @@ int main(int argc, char *argv[])
 	scanf("%s", url);
 	printf("entrez un nombre de retour\n");
 	scanf("%i",&nb_retour);
-	chercher_image_couleur(url, nb_retour);
+	chercher_image_couleur(url, nb_retour, url_list);
 
 	//chercher une image en fonction des cluster :
-//	printf ("entrez une url \n");
-//	scanf("%s", url);
-//	printf("entrez un nombre de retour\n");
+	//printf ("entrez une url \n");
+	//scanf("%s", url);
+	//printf("entrez un nombre de retour\n");
 	
-//	scanf("%i",&nb_retour);
-//	chercher_image_sift(url, nb_retour);
+	//scanf("%i",&nb_retour);
+	//chercher_image_sift(url, nb_retour, url_list);
 
 	//cherche une image en fonction des deux :
 //	chercher_image_combined();
