@@ -105,7 +105,7 @@ void process_histogramme_couleur (float* histogramme, char * url) {
 	int i,j,nx,ny,num,x;
 
 	CIMAGE cim;
-
+	printf ("j'essaie de lire l'image : url : %s\n", url );
 	read_cimage(url,&cim);
 
 	printf("Image lue\n");
@@ -156,11 +156,14 @@ void creation_histos_couleur() {
 //PARAMETTRE : l'url de l'image requette et le nombre d'image a retourner , se sert du fichier histo.txt prerequis ce fichier contient les histogramme de toute les images de la base
 //RETOUR : les images reponses	
 void chercher_image_couleur(char * url, int nb_retour){
+	printf ("je commence a chercher l'image couleur\n");
 	FILE* FO= fopen ("histo.txt", "r");
+	printf ("j'ai ouvert le fichier histo.txt\n");
 	//TODO verifier que ce fichier n'est pas vide 
 	int i;
 	float histogramme[64]; 
 	process_histogramme_couleur(histogramme,url);
+	printf(" je calcule l'histogramme de cette image \n");
 	//TODO possible problemme 
 	FILE * fHistos = fopen(fileHisto,"rb");
 
@@ -222,6 +225,7 @@ void chercher_image_sift(char * url, int nb_retour){
 }
 
 void chercher_image_combined(){
+//TODO
 }
 
 int main(int argc, char *argv[])
@@ -229,9 +233,11 @@ int main(int argc, char *argv[])
 	int nb_retour;
 	char url[300];
 	//generer l'histogramme des images en fonction de la couleur :
-	creation_histos_couleur();
+	//creation_histos_couleur();
+
 	//generer l'histogramme des images en fonction du clustering : 
-	creation_histos_sift();
+	//creation_histos_sift();
+
 	//chercher une image en fonction des couleurs :
 	printf ("entrez une url \n");
 	
@@ -239,15 +245,17 @@ int main(int argc, char *argv[])
 	printf("entrez un nombre de retour\n");
 	scanf("%i",&nb_retour);
 	chercher_image_couleur(url, nb_retour);
+
 	//chercher une image en fonction des cluster :
-	printf ("entrez une url \n");
-	scanf("%s", url);
-	printf("entrez un nombre de retour\n");
+//	printf ("entrez une url \n");
+//	scanf("%s", url);
+//	printf("entrez un nombre de retour\n");
 	
-	scanf("%i",&nb_retour);
-	chercher_image_sift(url, nb_retour);
+//	scanf("%i",&nb_retour);
+//	chercher_image_sift(url, nb_retour);
+
 	//cherche une image en fonction des deux :
-	chercher_image_combined();
+//	chercher_image_combined();
 	exit(0);
 }
 
