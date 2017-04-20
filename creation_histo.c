@@ -25,9 +25,6 @@ int hist_size;
 //PARAMETRE :fileTargeted : image comparée.
 //SORTIE : float : distance entre JE SAIS PAS 
 float distance_euclidienne(FILE *fileTargeted, float*histogramme) {
-
-//  int hist_size = sizeof(histogramme)/sizeof(float);   aïe aïe aïe, C, tu baisses dans mon estime en m'empêchant de faire ça !
-
   float h2[hist_size]; //histogramme de l'image comparée
 
   fread(h2, sizeof(float), hist_size, fileTargeted);
@@ -125,7 +122,7 @@ void process_histogramme_couleur (float* histogramme, char * url) {
 	int i,j,nx,ny,num,x;
 
 	CIMAGE cim;
-	printf ("j'essaie de lire l'image : url : %s\n", url );
+	printf ("je lis l'image : url : %s\n", url );
 	read_cimage(url,&cim);
 
 	printf("Image lue\n");
@@ -154,20 +151,17 @@ void process_histogramme_couleur (float* histogramme, char * url) {
 	}
 }
 
-// cree un fichier contennat tout les histogramme des images 
-//PARAMETTRE: ecrit dans le fichier histo.txt, et lit la liste des urls dans le fichier urls.txt
+// cree un fichier contenant tous les histogrammes des images 
 //RETOUR : les histogrammes des images sont ecrit dans le fichier histo.txt
 void creation_histos_couleur() {
 
-//	float *histogramme = malloc(sizeof(float)*64);
   float histogramme[64];
 
 	FILE* FO= fopen ("histo.txt", "r");
 	int i;
-	//TODO probablement pas a faire ici 
-    char** url =readList("urls.txt",&N);
-    images = malloc(sizeof(KEY)*N);
-    for (i=0; i<N;i++){
+
+  char** url =readList("urls.txt",&N);
+  for (i=0; i<N;i++){
 		process_histogramme_couleur (histogramme,url[i]);
 		fwrite(histogramme, sizeof (float), 64, FO);
 	}
@@ -189,7 +183,7 @@ void chercher_image_couleur(char * url, int nb_retour, char ** url_list){
   hist_size = 64;
 
 	process_histogramme_couleur(histogramme,url);
-	printf(" j'ai calculer l'histogramme de cette image \n");
+	printf(" j'ai calculé l'histogramme de cette image \n");
 
 	images = malloc(sizeof(KEY)*N);
 	//TODO possible problemme 
@@ -212,7 +206,7 @@ void chercher_image_couleur(char * url, int nb_retour, char ** url_list){
 	printf ("\n\n");
 	printf("creating res file...\n");
 
-	FILE* Fres = fopen("out.html","w");
+	FILE* Fres = fopen("out.html","a");
 
 //	for(i=N-1 ; i > N-nb_retour+1; i--) {
 	for(i=0 ; i < nb_retour ; i++) {		
@@ -266,10 +260,47 @@ void chercher_image_combined(){
 
 int main(int argc, char *argv[])
 {
-	int nb_retour;
-	char url[300];
-	char** url_list =readList("urls.txt",&N);
+  if(argc < 2) {
+    printf("Il faut utiliser un argument pour utiliser ce programme.\n\"i\" pour initier les histogrammes couleur des images de la base\n\"s\" pour faire une recherche par couleur\n\"I\" pour initier les SIFTs locaux\n\"S\" pour faire une recherche par descripteur locaux sift\n\"C\" pour faire une recherche combinee\n");
+    exit(0);
+  }
 
+  if(*argv[1]=='i') {
+    //generer l'histogramme des images en fonction de la couleur :
+    creation_histos_couleur();
+  } else if(*argv[1]=='I') {
+    //generer l'histogramme des images en fonction du clustering : 
+    printf ("Creation de l'histogramme sift\n");
+    creation_histos_sift();
+  }
+  else {
+    int nb_retour;
+    char url[300];
+    char** url_list =readList("urls.txt",&N);      
+
+    printf ("entrez une url \n");
+  
+    scanf("%s", url);
+    printf("entrez un nombre de retour\n");
+    scanf("%i",&nb_retour);
+
+    FILE* Fres = fopen("out.html","w");
+    fprintf(Fres,"Requete : <IMG SRC=%s>\nResultats :", url);
+    fclose(Fres);
+    if(*argv[1] == 's') {
+      //chercher une image en fonction des couleurs :
+      chercher_image_couleur(url, nb_retour, url_list);
+    } else if(*argv[1]=='S') {
+      //chercher une image en fonction des cluster :
+      chercher_image_sift(url, nb_retour, url_list);
+    } else {
+      //recherche combinée
+      chercher_image_combined();
+    }
+  }
+  exit(0);    
+
+/*
 	//generer l'histogramme des images en fonction de la couleur :
 	//creation_histos_couleur();
 
@@ -283,6 +314,11 @@ int main(int argc, char *argv[])
 	scanf("%s", url);
 	printf("entrez un nombre de retour\n");
 	scanf("%i",&nb_retour);
+
+  FILE* Fres = fopen("out.html","w");
+  fprintf(Fres,"Requete : <IMG SRC=%s>\nResultats :", url);
+  fclose(Fres);
+
 	chercher_image_couleur(url, nb_retour, url_list);
 
 	//chercher une image en fonction des cluster :
@@ -296,5 +332,6 @@ int main(int argc, char *argv[])
 	//cherche une image en fonction des deux :
 //	chercher_image_combined();
 	exit(0);
+*/
 }
 
