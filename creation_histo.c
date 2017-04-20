@@ -17,34 +17,38 @@
 
 
 
-int N=100;
+int N; //Nombre d'images dans la base
 KEY* images;
-float histogramme[64]; //l'histogramme du fichier requete
+int hist_size;
 
 //calcule la distance euclidienne entre JE SAIS PAS QUOI et l'histogramme du fichier requete qui en variable globale (BIZARRE)
 //PARAMETRE :fileTargeted : image comparée.
 //SORTIE : float : distance entre JE SAIS PAS 
-float distance_euclidienne(FILE *fileTargeted) {
-  float h2[64]; //histogramme de l'image comparée
+float distance_euclidienne(FILE *fileTargeted, float*histogramme) {
 
-  fread(h2, sizeof(float), 64, fileTargeted);
+//  int hist_size = sizeof(histogramme)/sizeof(float);   aïe aïe aïe, C, tu baisses dans mon estime en m'empêchant de faire ça !
+
+  float h2[hist_size]; //histogramme de l'image comparée
+
+  fread(h2, sizeof(float), hist_size, fileTargeted);
 
   float res = 0;
   int i;
-  for(i=0 ; i<64 ; i++) {
+  for(i=0 ; i<hist_size ; i++) {
     res += (histogramme[i] - h2[i]) * (histogramme[i]-h2[i]);
   }
+
   return res;
 }
 
  
 //set element i of the KEY array images[N]. sets the value to distance(FILE * fileTargeted)
 //PARAMETRE : descripteur de fichier filTargeted
-void setElementi(int i, FILE * fileTargeted) {
-  printf("setting image %i...\n",i);
+void setElementi(int i, FILE * fileTargeted, float* histogramme) {
+//  printf("setting image %i...\n",i);
   images[i].k = i;
-  printf ("je suis la \n");
-  images[i].d = distance_euclidienne(fileTargeted);
+//  printf ("je suis la \n");
+  images[i].d = distance_euclidienne(fileTargeted,histogramme);
 }
 
 
@@ -93,18 +97,18 @@ void creation_histos_sift(){
 	printf ("Ouverture du fichier de sortie \n");
 	FILE* FO= fopen ("histo_sift.txt", "r");
 	printf ("Ouverture du fichier de sortie sucess \n");
-	int n,i;
-	n=100;
-    	char** nom =readList("../../../list.txt",&N);
-        printf (" N= %i\n", N);
+	int i;
+	
+    char** nom =readList("../../../list.txt",&N);
+    printf (" N= %i\n", N);
     //possible problemme si couleur et sift utilise images
 	printf(" allocation des images\n");
-    	images = malloc(sizeof(KEY)*N);
+  images = malloc(sizeof(KEY)*N);
 	printf(" allocation des images sucess\n");
 	//char * nom_image;
 	//nom_image= malloc (sizeof (char )*3000);
 	//nom_image = "sift/test/1nn";	
-    for (i=0; i<N;i++){
+  for (i=0; i<N;i++){
 		//printf("initialisation du nom \n");
 		//strcat(nom_image,nom[i]); 
 		printf(" Procesing image : %s \n", nom[i]);
@@ -155,17 +159,20 @@ void process_histogramme_couleur (float* histogramme, char * url) {
 //RETOUR : les histogrammes des images sont ecrit dans le fichier histo.txt
 void creation_histos_couleur() {
 
-	float histogramme[64];
+//	float *histogramme = malloc(sizeof(float)*64);
+  float histogramme[64];
+
 	FILE* FO= fopen ("histo.txt", "r");
 	int i;
 	//TODO probablement pas a faire ici 
     char** url =readList("urls.txt",&N);
     images = malloc(sizeof(KEY)*N);
-    int n=100;
-    for (i=0; i<n;i++){
+    for (i=0; i<N;i++){
 		process_histogramme_couleur (histogramme,url[i]);
 		fwrite(histogramme, sizeof (float), 64, FO);
 	}
+
+	fclose(FO);
 }
 
 
@@ -174,23 +181,24 @@ void creation_histos_couleur() {
 //RETOUR : les images reponses	
 void chercher_image_couleur(char * url, int nb_retour, char ** url_list){
 	printf ("je commence a chercher l'image couleur\n");
-	FILE* FO= fopen ("histo.txt", "r");
+	FILE* Freading= fopen ("histo.txt", "r");
 	printf ("j'ai ouvert le fichier histo.txt\n");
 	//TODO verifier que ce fichier n'est pas vide 
 	int i;
-	float histogramme[64]; 
+  float *histogramme = malloc(sizeof(float)*64);
+  hist_size = 64;
+
 	process_histogramme_couleur(histogramme,url);
 	printf(" j'ai calculer l'histogramme de cette image \n");
+
 	images = malloc(sizeof(KEY)*N);
 	//TODO possible problemme 
 	//FILE * fHistos = fopen(fileHisto,"rb");
 
 	//TODO trouver une solution pour le parcours de ce fichier 
-	int n=100;
-	for (i=0; i<n;i++){
-   		printf ("Procesing %d/%d ...\n",i,n);
-		//setElementi(i, fHistos);
-		setElementi(i, FO);
+	for (i=0; i<N;i++){
+   		printf ("Procesing %d/%d ...\n",i,N);
+		setElementi(i, Freading,histogramme);
 		printf(" images[%i].k = %i, images[%i].d = %f\n",i,images[i].k,i,images[i].d);
     }
 
@@ -198,7 +206,7 @@ void chercher_image_couleur(char * url, int nb_retour, char ** url_list){
 
 	sort();
 	printf ("\n\n");
-	for (i=0;i <n;i++){
+	for (i=0;i <N;i++){
 		printf(" images[%i].k = %i, images[%i].d = %f\n",i,images[i].k,i,images[i].d);
 	}
 	printf ("\n\n");
@@ -206,29 +214,32 @@ void chercher_image_couleur(char * url, int nb_retour, char ** url_list){
 
 	FILE* Fres = fopen("out.html","w");
 
-	for(i=0 ; i < nb_retour; i++) {
-		
-		fprintf(Fres, "%i : %i<IMG SRC=\"%s\">\n",i,images[i].k, url_list[images[i].k]);
+//	for(i=N-1 ; i > N-nb_retour+1; i--) {
+	for(i=0 ; i < nb_retour ; i++) {		
+		fprintf(Fres, "<IMG SRC=\"%s\">\n",url_list[images[i].k]);
 	}	
 
 
 	fclose(Fres);
-	fclose(FO);
+	fclose(Freading);
+  free(histogramme);
 }	
 
 
 void chercher_image_sift(char * url, int nb_retour, char ** url_list){
 	FILE* FO= fopen ("histo_sift.txt", "r");
 	int i;
-	float histogramme[256]; 
+//	float histogramme[256]; 
+  float *histogramme = malloc(sizeof(float)*256);
+  hist_size = 256;
+
 	process_histogramme_sift(histogramme,url);
 
 	FILE * fHistos = fopen(fileHisto,"rb");
-	//TODO changer ca 
-	int n=100;
-	for (i=0; i<n;i++){
+
+	for (i=0; i<N;i++){
    		printf ("Procesing %d/%d ...\n",i,N);
-		setElementi(i, fHistos);
+		setElementi(i, fHistos, histogramme);
 		printf(" images[%i].k = %i, images[%i].d = %f\n",i,images[i].k,i,images[i].d);
     }
 
@@ -246,6 +257,7 @@ void chercher_image_sift(char * url, int nb_retour, char ** url_list){
 
 	fclose(Fres);
 	fclose(FO);
+  free(histogramme);
 }
 
 void chercher_image_combined(){
@@ -257,20 +269,21 @@ int main(int argc, char *argv[])
 	int nb_retour;
 	char url[300];
 	char** url_list =readList("urls.txt",&N);
+
 	//generer l'histogramme des images en fonction de la couleur :
 	//creation_histos_couleur();
 
 	//generer l'histogramme des images en fonction du clustering : 
-	printf ("Creation de l'histogramme sift\n");
-	creation_histos_sift();
+//	printf ("Creation de l'histogramme sift\n");
+//	creation_histos_sift();
 
 	//chercher une image en fonction des couleurs :
-	//printf ("entrez une url \n");
+	printf ("entrez une url \n");
 	
-	//scanf("%s", url);
-	//printf("entrez un nombre de retour\n");
-	//scanf("%i",&nb_retour);
-	//chercher_image_couleur(url, nb_retour, url_list);
+	scanf("%s", url);
+	printf("entrez un nombre de retour\n");
+	scanf("%i",&nb_retour);
+	chercher_image_couleur(url, nb_retour, url_list);
 
 	//chercher une image en fonction des cluster :
 	//printf ("entrez une url \n");
