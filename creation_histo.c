@@ -59,43 +59,50 @@ void sort() {
 // calcule l'histogramme normalisee d'une image sift. 
 //parametre un histogramme vide de taille 256, et le nom d'un fichier sift a ouvrir ????
 // retourne l'histogramme de l'image dont le nom est passe en parametre normalise
-void process_histogramme_sift(float* histogramme,char* fname) {
+int process_histogramme_sift(float* histogramme,char* fname) {
 	printf ("je commencea traiter l'image : %s\n", fname);
 	int x;
 	printf ("j'ouvre le fichier avec l'image \n");
 	FILE * f = fopen(fname, "r");
-	
-	int num = 0,i=0;
-	printf ("initialisation de l'histogramme\n");
-	/*initialisation de l'histogramme*/
-	for (x=0;x<256;x++){
-		histogramme[x]=0.0;
-	}
+	if (f!=NULL){
+		int num = 0,i=0;
+		printf ("initialisation de l'histogramme\n");
+		/*initialisation de l'histogramme*/
+		for (x=0;x<256;x++){
+			histogramme[x]=0.0;
+		}
 
-	while(fscanf(f, "%d",&num)!= EOF) {
-		histogramme[num]++;
-		i++;
+		while(fscanf(f, "%d",&num)!= EOF) {
+			histogramme[num]++;
+			i++;
+		}
+		
+		printf ("normalisation\n");
+		//normalisation
+		for (x=0;x<256;x++){
+			histogramme[x]= histogramme[x]/(i);
+		}
 	}
-	
-	printf ("normalisation\n");
-	//normalisation
-	for (x=0;x<256;x++){
-		histogramme[x]= histogramme[x]/(i);
+	else {
+		printf("EROR d'ouverture de l'image\n");
+		return 0;
 	}
 	printf ("je fini de traiter l'image : %s\n", fname);
+	fclose (f);
 	
+	return 1;
 }
 
 
-void creation_histos_sift(){
+int creation_histos_sift(){
 
 	float histogramme[256];
 	printf ("Ouverture du fichier de sortie \n");
-	FILE* FO= fopen ("histo_sift.txt", "r");
+	FILE* FO= fopen ("histo_sift.txt", "w+");
 	printf ("Ouverture du fichier de sortie sucess \n");
 	int n,i;
 	n=100;
-    	char** nom =readList("../../../list.txt",&N);
+    	char** nom =readList("list2.txt",&N);
         printf (" N= %i\n", N);
     //possible problemme si couleur et sift utilise images
 	printf(" allocation des images\n");
@@ -109,9 +116,14 @@ void creation_histos_sift(){
 		//strcat(nom_image,nom[i]); 
 		printf(" Procesing image : %s \n", nom[i]);
 		
+		
 		process_histogramme_sift (histogramme,nom[i]);
+		printf(" Procesing image fin \n");
 		fwrite(histogramme, sizeof (float), 256, FO);
+		printf(" ecriture image fin \n");
 	}
+	fclose (FO);
+	return 1;
 }
 
 //créé l'histogramme d'une image donnée	
@@ -158,7 +170,6 @@ void creation_histos_couleur() {
 	float histogramme[64];
 	FILE* FO= fopen ("histo.txt", "r");
 	int i;
-	//TODO probablement pas a faire ici 
     char** url =readList("urls.txt",&N);
     images = malloc(sizeof(KEY)*N);
     int n=100;
@@ -176,19 +187,17 @@ void chercher_image_couleur(char * url, int nb_retour, char ** url_list){
 	printf ("je commence a chercher l'image couleur\n");
 	FILE* FO= fopen ("histo.txt", "r");
 	printf ("j'ai ouvert le fichier histo.txt\n");
-	//TODO verifier que ce fichier n'est pas vide 
+	
 	int i;
 	float histogramme[64]; 
 	process_histogramme_couleur(histogramme,url);
 	printf(" j'ai calculer l'histogramme de cette image \n");
 	images = malloc(sizeof(KEY)*N);
-	//TODO possible problemme 
-	//FILE * fHistos = fopen(fileHisto,"rb");
-
-	//TODO trouver une solution pour le parcours de ce fichier 
-	int n=100;
-	for (i=0; i<n;i++){
-   		printf ("Procesing %d/%d ...\n",i,n);
+	
+	
+	
+	for (i=0; i<N;i++){
+   		printf ("Procesing %d/%d ...\n",i,N);
 		//setElementi(i, fHistos);
 		setElementi(i, FO);
 		printf(" images[%i].k = %i, images[%i].d = %f\n",i,images[i].k,i,images[i].d);
@@ -197,11 +206,6 @@ void chercher_image_couleur(char * url, int nb_retour, char ** url_list){
 	printf("sorting results...\n");
 
 	//sort();
-	printf ("\n\n");
-	for (i=0;i <n;i++){
-		printf(" images[%i].k = %i, images[%i].d = %f\n",i,images[i].k,i,images[i].d);
-	}
-	printf ("\n\n");
 	printf("creating res file...\n");
 
 	FILE* Fres = fopen("out.html","w");
@@ -215,7 +219,7 @@ void chercher_image_couleur(char * url, int nb_retour, char ** url_list){
 	fclose(Fres);
 	fclose(FO);
 }	
-
+ 
 
 void chercher_image_sift(char * url, int nb_retour, char ** url_list){
 	FILE* FO= fopen ("histo_sift.txt", "r");
@@ -223,25 +227,23 @@ void chercher_image_sift(char * url, int nb_retour, char ** url_list){
 	float histogramme[256]; 
 	process_histogramme_sift(histogramme,url);
 
-	FILE * fHistos = fopen(fileHisto,"rb");
-	//TODO changer ca 
-	int n=100;
-	for (i=0; i<n;i++){
+	images = malloc(sizeof(KEY)*N);
+	for (i=0; i<N;i++){
    		printf ("Procesing %d/%d ...\n",i,N);
-		setElementi(i, fHistos);
+		setElementi(i, FO);
 		printf(" images[%i].k = %i, images[%i].d = %f\n",i,images[i].k,i,images[i].d);
     }
 
 	printf("sorting results...\n");
 
-	sort();
+	//sort();
 
 	printf("creating res file...\n");
 
 	FILE* Fres = fopen("out.html","w");
 
 	for(i=0 ; i < nb_retour; i++) {
-		fprintf(Fres, "<IMG SRC=\"%s\">\n",url_list[images[i].k]); //TODO trouver l'url de l'image n° images[i].k
+		fprintf(Fres, "<IMG SRC=\"%s\">\n",url_list[images[i].k]); 
 	}	
 
 	fclose(Fres);
@@ -258,13 +260,16 @@ int main(int argc, char *argv[])
 	char url[300];
 	char** url_list =readList("urls.txt",&N);
 	//generer l'histogramme des images en fonction de la couleur :
+	//TODO a tester 
 	//creation_histos_couleur();
 
 	//generer l'histogramme des images en fonction du clustering : 
-	printf ("Creation de l'histogramme sift\n");
-	creation_histos_sift();
+	//FONCTIONNE
+	//printf ("Creation de l'histogramme sift\n");
+	//creation_histos_sift();
 
 	//chercher une image en fonction des couleurs :
+	//PROBLEMME AVEC LE TRI 
 	//printf ("entrez une url \n");
 	
 	//scanf("%s", url);
@@ -273,12 +278,12 @@ int main(int argc, char *argv[])
 	//chercher_image_couleur(url, nb_retour, url_list);
 
 	//chercher une image en fonction des cluster :
-	//printf ("entrez une url \n");
-	//scanf("%s", url);
-	//printf("entrez un nombre de retour\n");
+	printf ("entrez une url \n");
+	scanf("%s", url);
+	printf("entrez un nombre de retour\n");
 	
-	//scanf("%i",&nb_retour);
-	//chercher_image_sift(url, nb_retour, url_list);
+	scanf("%i",&nb_retour);
+	chercher_image_sift(url, nb_retour, url_list);
 
 	//cherche une image en fonction des deux :
 //	chercher_image_combined();

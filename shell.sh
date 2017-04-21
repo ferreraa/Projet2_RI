@@ -17,7 +17,6 @@ do
 	do	
         if  !((i %150)) ; then 
 		echo $line >> "sample.txt"
-		#echo $line
 	fi
 	((i=i+1));
 	done <$element
