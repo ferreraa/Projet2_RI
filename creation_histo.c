@@ -20,6 +20,7 @@
 int N; //Nombre d'images dans la base
 KEY* images;
 int hist_size;
+CIMAGE cim;
 
 //calcule la distance euclidienne entre JE SAIS PAS QUOI et l'histogramme du fichier requete qui en variable globale (BIZARRE)
 //PARAMETRE :fileTargeted : image comparée.
@@ -115,8 +116,8 @@ int creation_histos_sift(){
 	char** nom =readList("list2.txt",&N);
 	printf (" N= %i\n", N);
 
-	printf(" allocation des images\n");
-    images = malloc(sizeof(KEY)*N);
+	//printf(" allocation des images\n");
+    //images = malloc(sizeof(KEY)*N);
 	
 	for (i=0; i<N;i++){
 		printf(" Procesing image : %s \n", nom[i]);
@@ -134,7 +135,7 @@ int creation_histos_sift(){
 	void process_histogramme_couleur (float* histogramme, char * url) {
 		int i,j,nx,ny,num,x;
 
-		CIMAGE cim;
+		//CIMAGE cim;
 		printf ("je lis l'image : url : %s\n", url );
 		read_cimage(url,&cim); 
 
@@ -152,7 +153,7 @@ int creation_histos_sift(){
 				num=cim.r[x][j]/64+(cim.g[x][j]/64)*4+(cim.b[x][j]/64)*16;
 				histogramme[num]++;
 			}
-			printf (".");
+	//		printf (".");
 		}
 //		printf (".");
 	
@@ -174,7 +175,7 @@ void creation_histos_couleur() {
 	int i;
 
 	char** url =readList("urls.txt",&N);
-	images = malloc(sizeof(KEY)*N); // j'ai l'impression que ca sert a rien ici 
+	//images = malloc(sizeof(KEY)*N); // j'ai l'impression que ca sert a rien ici 
 
 
 	for (i=0; i<N;i++){
