@@ -142,7 +142,7 @@ void process_histogramme_couleur (float* histogramme, char * url) {
 			num=cim.r[x][j]/64+(cim.g[x][j]/64)*4+(cim.b[x][j]/64)*16;
 			histogramme[num]++;
 		}
-		printf (".");
+//		printf (".");
 	}
 
 	//normalisation

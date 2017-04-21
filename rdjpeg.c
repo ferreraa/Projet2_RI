@@ -23,6 +23,7 @@ void read_cimage(char *name, CIMAGE *cim)
   /*-----------------------------------*/
   if ((fp = popen(command,"r")) == NULL) {
     fprintf(stderr,"Can't open PBM file from \"%s\" command, exiting",command);
+    printf("Error opening file: %s\n",strerror(errno) );
     exit(1);
   }
   free(command);
