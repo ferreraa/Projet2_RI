@@ -154,6 +154,9 @@ int creation_histos_sift(){
 			}
 			printf (".");
 		}
+//		printf (".");
+	
+
 
 		//normalisation
 		for (i=0;i<64;i++){
